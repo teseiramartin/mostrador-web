@@ -7,7 +7,7 @@ import {
   Select,
   type SelectChangeEvent,
 } from '@mui/material'
-import { Bell, ChevronDown, Menu, Store } from 'lucide-react'
+import { Bell, ChevronDown, LogOut, Menu, Store } from 'lucide-react'
 import type { Branch, Role } from '../../types'
 import styles from './Topbar.module.scss'
 
@@ -20,7 +20,7 @@ interface Props {
   onBranchChange: (id: string) => void
   onMenuOpen: () => void
   onAlerts: () => void
-  onSwitchRole: () => void
+  onLogout: () => void
 }
 
 export function Topbar({
@@ -32,7 +32,7 @@ export function Topbar({
   onBranchChange,
   onMenuOpen,
   onAlerts,
-  onSwitchRole,
+  onLogout,
 }: Props) {
   const active = branches.find((branch) => branch.id === branchId)
   return (
@@ -87,10 +87,9 @@ export function Topbar({
         <Button
           className={styles.roleButton}
           variant="outlined"
-          onClick={onSwitchRole}
+          onClick={onLogout}
         >
-          {role === 'owner' ? 'Vista dueño' : 'Vista vendedor'}{' '}
-          <ChevronDown size={14} />
+          Salir <LogOut size={14} />
         </Button>
       </div>
     </header>

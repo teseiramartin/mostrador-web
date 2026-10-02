@@ -32,6 +32,7 @@ interface Props {
   products: Product[]
   sales: Sale[]
   onNewSale: () => void
+  onNewProduct: () => void
   onBranch: (id: string) => void
 }
 
@@ -49,6 +50,7 @@ export function DataPage({
   products,
   sales,
   onNewSale,
+  onNewProduct,
   onBranch,
 }: Props) {
   const [query, setQuery] = useState('')
@@ -106,6 +108,15 @@ export function DataPage({
             onClick={onNewSale}
           >
             Nueva venta
+          </Button>
+        )}
+        {role === 'owner' && view === 'products' && (
+          <Button
+            variant="contained"
+            startIcon={<Plus size={17} />}
+            onClick={onNewProduct}
+          >
+            Nuevo producto
           </Button>
         )}
       </div>
@@ -338,6 +349,16 @@ export function DataPage({
           </div>
         )}
       </Paper>
+      {view === 'products' && role === 'owner' && (
+        <Paper className={styles.importNote}>
+          <strong>¿Tenés una lista en Excel?</strong>
+          <span>
+            La importación por archivo será el siguiente paso. Por ahora podés
+            cargar productos uno por uno.
+          </span>
+          <Button disabled>Importar Excel · próximamente</Button>
+        </Paper>
+      )}
     </div>
   )
 }

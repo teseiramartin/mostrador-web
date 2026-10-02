@@ -1,0 +1,31 @@
+.fields {
+  display: grid;
+  gap: 15px;
+  padding-top: 5px !important;
+}
+.fields p {
+  color: #738476;
+  font-size: 12px;
+  margin: 0 0 5px;
+}
+.fields strong {
+  color: #315840;
+  font-size: 12px;
+  margin-top: 4px;
+}
+.row {
+  display: flex;
+  gap: 12px;
+}
+.row > * {
+  flex: 1;
+  min-width: 0;
+}
+.actions {
+  padding: 16px 24px 22px !important;
+}
+@media (max-width: 540px) {
+  .row {
+    flex-direction: column;
+  }
+}

@@ -7,18 +7,29 @@ import {
   Snackbar,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
+import { ClientFormDialog } from '../components/ClientFormDialog/ClientFormDialog'
+import { ProductFormDialog } from '../components/ProductFormDialog/ProductFormDialog'
 import { SaleDialog } from '../components/SaleDialog/SaleDialog'
 import { Sidebar } from '../components/Sidebar/Sidebar'
 import { Topbar } from '../components/Topbar/Topbar'
 import { BranchDashboard } from '../pages/BranchDashboard/BranchDashboard'
+import { ClientsPage } from '../pages/ClientsPage/ClientsPage'
 import { DataPage } from '../pages/DataPage/DataPage'
+import { FiscalPage } from '../pages/FiscalPage/FiscalPage'
+import { LoginPage } from '../pages/LoginPage/LoginPage'
 import { OwnerDashboard } from '../pages/OwnerDashboard/OwnerDashboard'
 import { PendingPage } from '../pages/PendingPage/PendingPage'
 import { useAppDispatch, useAppSelector } from '../state/hooks'
 import { loadCatalog } from '../state/modules/catalog'
+import { createProduct } from '../state/modules/catalog'
+import { createClient, loadClients } from '../state/modules/clients'
 import { createSale, loadSales } from '../state/modules/sales'
-import { setBranch, setRole } from '../state/modules/session'
-import type { Role, Sale, SaleLine, View } from '../types'
+import { login, logout, setBranch } from '../state/modules/session'
+import type {
+  CreateClientRequest,
+  CreateProductRequest,
+} from '../services/types'
+import type { Sale, SaleLine, View } from '../types'
 import { getStockAlerts } from '../utils/business'
 import styles from './App.module.scss'
 
@@ -27,13 +38,21 @@ const pageTitle: Record<View, string> = {
   branch: 'Sucursal',
   sales: 'Ventas',
   products: 'Productos',
+  clients: 'Clientes',
   stock: 'Inventario',
+  fiscal: 'Facturación ARCA',
   pending: 'Pendientes de validar',
 }
 
 export default function App() {
   const dispatch = useAppDispatch()
-  const { role, branchId } = useAppSelector((state) => state.session)
+  const {
+    user,
+    role,
+    branchId,
+    pending: loginPending,
+    error: loginError,
+  } = useAppSelector((state) => state.session)
   const {
     branches,
     products,
@@ -41,6 +60,16 @@ export default function App() {
     pending: catalogPending,
     error: catalogError,
   } = useAppSelector((state) => state.catalog)
+  const {
+    items: clients,
+    pending: clientsPending,
+    error: clientsLoadError,
+    saving: clientSaving,
+    saveError: clientError,
+  } = useAppSelector((state) => state.clients)
+  const { saving: productSaving, saveError: productError } = useAppSelector(
+    (state) => state.catalog,
+  )
   const {
     items: sales,
     loaded: salesLoaded,
@@ -50,15 +79,21 @@ export default function App() {
   } = useAppSelector((state) => state.sales)
   const [view, setView] = useState<View>('overview')
   const [saleOpen, setSaleOpen] = useState(false)
+  const [productOpen, setProductOpen] = useState(false)
+  const [clientOpen, setClientOpen] = useState(false)
+  const [productAttempted, setProductAttempted] = useState(false)
+  const [clientAttempted, setClientAttempted] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [notice, setNotice] = useState<{
     text: string
     severity: 'success' | 'error'
   } | null>(null)
   useEffect(() => {
+    if (!user) return
     void dispatch(loadCatalog())
     void dispatch(loadSales())
-  }, [dispatch])
+    if (user.role === 'owner') void dispatch(loadClients())
+  }, [dispatch, user])
   const alertCount = getStockAlerts(
     products,
     branches,
@@ -66,25 +101,29 @@ export default function App() {
   ).length
 
   const selectView = (next: View) => {
-    if (role === 'seller' && (next === 'pending' || next === 'branch')) return
+    if (
+      role === 'seller' &&
+      (next === 'pending' ||
+        next === 'branch' ||
+        next === 'clients' ||
+        next === 'fiscal')
+    )
+      return
     if (next === 'branch' && branchId === 'all') dispatch(setBranch('centro'))
     setView(next)
     setMobileOpen(false)
   }
 
-  const switchRole = () => {
-    const next: Role = role === 'owner' ? 'seller' : 'owner'
-    dispatch(setRole(next))
+  const signOut = () => {
+    dispatch(logout())
     setView('overview')
     setMobileOpen(false)
     setSaleOpen(false)
-    setNotice({
-      severity: 'success',
-      text:
-        next === 'owner'
-          ? 'Vista de demostración: dueño'
-          : 'Vista de demostración: vendedor de Centro',
-    })
+    setProductOpen(false)
+    setClientOpen(false)
+    setProductAttempted(false)
+    setClientAttempted(false)
+    setNotice(null)
   }
 
   const selectBranch = (next: string) => {
@@ -101,7 +140,12 @@ export default function App() {
     if (role !== 'seller') return false
     try {
       const sale = await dispatch(
-        createSale({ branchId, cashier: 'Lucía Fernández', payment, lines }),
+        createSale({
+          branchId,
+          cashier: user?.name ?? 'Vendedor',
+          payment,
+          lines,
+        }),
       )
       setSaleOpen(false)
       setView('sales')
@@ -121,6 +165,47 @@ export default function App() {
       return false
     }
   }
+
+  const saveProduct = async (
+    request: CreateProductRequest,
+  ): Promise<boolean> => {
+    setProductAttempted(true)
+    try {
+      await dispatch(createProduct(request))
+      setProductOpen(false)
+      setNotice({
+        text: 'Producto agregado al catálogo y al inventario.',
+        severity: 'success',
+      })
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  const saveClient = async (request: CreateClientRequest): Promise<boolean> => {
+    setClientAttempted(true)
+    try {
+      await dispatch(createClient(request))
+      setClientOpen(false)
+      setNotice({
+        text: 'Cliente agregado al directorio.',
+        severity: 'success',
+      })
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  if (!user)
+    return (
+      <LoginPage
+        pending={loginPending}
+        error={loginError}
+        onLogin={(request) => dispatch(login(request))}
+      />
+    )
 
   const content =
     !catalogLoaded || !salesLoaded ? (
@@ -169,6 +254,18 @@ export default function App() {
       />
     ) : view === 'pending' ? (
       <PendingPage />
+    ) : view === 'clients' ? (
+      <ClientsPage
+        clients={clients}
+        pending={clientsPending}
+        error={clientsLoadError}
+        onNewClient={() => {
+          setClientAttempted(false)
+          setClientOpen(true)
+        }}
+      />
+    ) : view === 'fiscal' ? (
+      <FiscalPage />
     ) : (
       <DataPage
         branches={branches}
@@ -178,6 +275,10 @@ export default function App() {
         products={products}
         sales={sales}
         onNewSale={() => setSaleOpen(true)}
+        onNewProduct={() => {
+          setProductAttempted(false)
+          setProductOpen(true)
+        }}
         onBranch={selectBranch}
       />
     )
@@ -187,10 +288,11 @@ export default function App() {
       branches={branches}
       branchId={branchId}
       role={role}
+      user={user}
       view={view}
       alertCount={alertCount}
       onSelect={selectView}
-      onSwitchRole={switchRole}
+      onLogout={signOut}
     />
   )
   return (
@@ -220,7 +322,7 @@ export default function App() {
           onBranchChange={selectBranch}
           onMenuOpen={() => setMobileOpen(true)}
           onAlerts={() => selectView('stock')}
-          onSwitchRole={switchRole}
+          onLogout={signOut}
         />
         <main className={styles.scrollArea}>
           <div className={styles.content}>
@@ -241,6 +343,31 @@ export default function App() {
           products={products}
           onClose={() => setSaleOpen(false)}
           onConfirm={registerSale}
+        />
+      )}
+      {productOpen && (
+        <ProductFormDialog
+          open={productOpen}
+          branches={branches}
+          pending={productSaving}
+          error={productAttempted ? productError : null}
+          onClose={() => {
+            setProductOpen(false)
+            setProductAttempted(false)
+          }}
+          onSubmit={saveProduct}
+        />
+      )}
+      {clientOpen && (
+        <ClientFormDialog
+          open={clientOpen}
+          pending={clientSaving}
+          error={clientAttempted ? clientError : null}
+          onClose={() => {
+            setClientOpen(false)
+            setClientAttempted(false)
+          }}
+          onSubmit={saveClient}
         />
       )}
       <Snackbar

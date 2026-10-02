@@ -1,2 +1,5 @@
-export const SET_ROLE = 'session/SET_ROLE'
 export const SET_BRANCH = 'session/SET_BRANCH'
+export const LOGIN_ATTEMPT = 'session/LOGIN_ATTEMPT'
+export const LOGIN_SUCCESS = 'session/LOGIN_SUCCESS'
+export const LOGIN_FAILURE = 'session/LOGIN_FAILURE'
+export const LOGOUT = 'session/LOGOUT'

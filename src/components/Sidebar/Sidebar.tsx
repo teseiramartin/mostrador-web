@@ -7,16 +7,18 @@ import {
   ListItemText,
 } from '@mui/material'
 import {
-  ArrowLeftRight,
+  LogOut,
   Boxes,
   ChartNoAxesCombined,
   ClipboardList,
   PackageSearch,
   ReceiptText,
   Store,
+  UsersRound,
+  FileCheck2,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
-import type { Branch, Role, View } from '../../types'
+import type { Branch, Role, User, View } from '../../types'
 import styles from './Sidebar.module.scss'
 
 type NavigationItem = { view: View; label: string; icon: ReactNode }
@@ -30,7 +32,9 @@ const ownerItems: NavigationItem[] = [
   { view: 'branch', label: 'Sucursales', icon: <Store size={18} /> },
   { view: 'sales', label: 'Ventas', icon: <ReceiptText size={18} /> },
   { view: 'products', label: 'Productos', icon: <PackageSearch size={18} /> },
+  { view: 'clients', label: 'Clientes', icon: <UsersRound size={18} /> },
   { view: 'stock', label: 'Inventario', icon: <Boxes size={18} /> },
+  { view: 'fiscal', label: 'Facturación ARCA', icon: <FileCheck2 size={18} /> },
   {
     view: 'pending',
     label: 'Pendientes de validar',
@@ -53,23 +57,24 @@ interface Props {
   branches: Branch[]
   branchId: string
   role: Role
+  user: User
   view: View
   alertCount: number
   onSelect: (view: View) => void
-  onSwitchRole: () => void
+  onLogout: () => void
 }
 
 export function Sidebar({
   branches,
   branchId,
   role,
+  user,
   view,
   alertCount,
   onSelect,
-  onSwitchRole,
+  onLogout,
 }: Props) {
   const items = role === 'owner' ? ownerItems : sellerItems
-  const name = role === 'owner' ? 'Andrés Molina' : 'Lucía Fernández'
   const assignedBranch = branches.find((branch) => branch.id === branchId)
   return (
     <aside className={styles.sidebar}>
@@ -118,16 +123,17 @@ export function Sidebar({
             </ListItemButton>
           ))}
         </List>
-        <div className={styles.hint}>
-          <span className={styles.hintLabel}>DEMO · ETAPA 1</span>
-          <strong>Del mostrador a una vista de todo el negocio.</strong>
-          <p>Datos ficticios para conversar sobre la primera versión.</p>
-        </div>
       </div>
       <div className={styles.profile}>
-        <div className={styles.avatar}>{role === 'owner' ? 'AM' : 'LF'}</div>
+        <div className={styles.avatar}>
+          {user.name
+            .split(' ')
+            .map((part) => part[0])
+            .slice(0, 2)
+            .join('')}
+        </div>
         <div className={styles.profileText}>
-          <strong>{name}</strong>
+          <strong>{user.name}</strong>
           <small>
             {role === 'owner'
               ? 'Dueño · Todos los locales'
@@ -139,10 +145,10 @@ export function Sidebar({
       <Button
         className={styles.switchButton}
         size="small"
-        startIcon={<ArrowLeftRight size={14} />}
-        onClick={onSwitchRole}
+        startIcon={<LogOut size={14} />}
+        onClick={onLogout}
       >
-        Cambiar perfil de prueba
+        Salir · elegir otro perfil
       </Button>
     </aside>
   )

@@ -34,6 +34,29 @@ export interface Sale {
   lines: SaleLine[]
 }
 
+export interface Client {
+  id: string
+  name: string
+  document: string
+  email: string
+  phone: string
+}
+
+export interface User {
+  id: string
+  name: string
+  email: string
+  role: Role
+  branchId: string | null
+}
+
 export type Role = 'owner' | 'seller'
 export type View =
-  'overview' | 'branch' | 'sales' | 'products' | 'stock' | 'pending'
+  | 'overview'
+  | 'branch'
+  | 'sales'
+  | 'products'
+  | 'clients'
+  | 'stock'
+  | 'fiscal'
+  | 'pending'

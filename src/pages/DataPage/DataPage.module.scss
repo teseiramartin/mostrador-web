@@ -1,6 +1,26 @@
 .page {
   padding-bottom: 28px;
 }
+.importNote {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin-top: 16px;
+  padding: 18px 20px;
+  border: 1px solid #e1e7df;
+  border-radius: 14px !important;
+  color: #667568;
+  font-size: 11px;
+}
+.importNote strong {
+  color: #244a39;
+  font-size: 12px;
+}
+.importNote button {
+  margin-left: auto;
+  white-space: nowrap;
+}
 .heading {
   display: flex;
   justify-content: space-between;

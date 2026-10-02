@@ -2,6 +2,9 @@ import { createReducer } from '@reduxjs/toolkit'
 import type { Branch, Product } from '../../../types'
 import { saleCreated } from '../sales/actions'
 import {
+  createProductAttempt,
+  createProductFailure,
+  createProductSuccess,
   loadCatalogAttempt,
   loadCatalogFailure,
   loadCatalogSuccess,
@@ -11,6 +14,8 @@ interface CatalogState {
   branches: Branch[]
   products: Product[]
   pending: boolean
+  saving: boolean
+  saveError: string | null
   loaded: boolean
   error: string | null
 }
@@ -19,12 +24,26 @@ const initialState: CatalogState = {
   branches: [],
   products: [],
   pending: false,
+  saving: false,
+  saveError: null,
   loaded: false,
   error: null,
 }
 
 export default createReducer(initialState, (builder) => {
   builder
+    .addCase(createProductAttempt, (state) => {
+      state.saving = true
+      state.saveError = null
+    })
+    .addCase(createProductSuccess, (state, action) => {
+      state.products.push(action.payload)
+      state.saving = false
+    })
+    .addCase(createProductFailure, (state, action) => {
+      state.saving = false
+      state.saveError = action.payload
+    })
     .addCase(loadCatalogAttempt, (state) => {
       state.pending = true
       state.error = null
