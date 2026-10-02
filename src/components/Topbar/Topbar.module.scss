@@ -1,0 +1,171 @@
+.topbar {
+  min-height: 68px;
+  background: #fff;
+  border-bottom: 1px solid #e7ebe5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 34px;
+  flex: 0 0 auto;
+}
+.left {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  color: #8c978f;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.left strong {
+  font-size: 11px;
+  color: #244a39;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.slash {
+  color: #c6d0c7;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.demoLabel {
+  color: #a3ada5;
+  font-weight: 800;
+  font-size: 8px;
+  letter-spacing: 0.13em;
+  white-space: nowrap;
+}
+.branchControl {
+  width: 198px;
+  flex: 0 0 198px;
+  :global(.MuiOutlinedInput-root) {
+    border-radius: 10px;
+    height: 38px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #244a39;
+    background: #fff;
+    transition: box-shadow 160ms ease;
+  }
+  :global(.MuiSelect-select) {
+    display: flex;
+    align-items: center;
+    padding: 8px 40px 8px 13px !important;
+    min-height: 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  :global(.MuiSelect-icon) {
+    width: 17px;
+    height: 17px;
+    right: 12px;
+    color: #52705c;
+  }
+  :global(.MuiOutlinedInput-notchedOutline) {
+    border-color: #d7e3d8;
+  }
+  :global(.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline) {
+    border-color: #97b39e;
+  }
+  :global(.MuiOutlinedInput-root.Mui-focused) {
+    box-shadow: 0 0 0 3px #e6f0e6;
+  }
+  :global(.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline) {
+    border-color: #7ca588;
+    border-width: 1px;
+  }
+}
+.fixedBranch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #e4e9e2;
+  background: #f9faf8;
+  border-radius: 9px;
+  padding: 8px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.notification {
+  color: #456454 !important;
+}
+.roleButton {
+  height: 38px;
+  color: #28553f !important;
+  border-color: #dae5da !important;
+  font-size: 11px !important;
+  padding: 0 12px !important;
+  white-space: nowrap;
+}
+.roleButton svg {
+  margin-left: 6px;
+}
+.mobileMenu {
+  display: none !important;
+}
+@media (max-width: 900px) {
+  .topbar {
+    padding: 0 17px;
+  }
+  .demoLabel {
+    display: none;
+  }
+  .actions {
+    gap: 7px;
+  }
+}
+@media (max-width: 760px) {
+  .mobileMenu {
+    display: inline-flex !important;
+  }
+  .business,
+  .slash {
+    display: none;
+  }
+  .topbar {
+    min-height: 60px;
+  }
+  .branchControl {
+    width: 160px;
+    flex-basis: 160px;
+    :global(.MuiOutlinedInput-root) {
+      font-size: 11px;
+    }
+  }
+  .roleButton {
+    display: none !important;
+  }
+  .fixedBranch {
+    font-size: 10px;
+  }
+}
+@media (max-width: 470px) {
+  .topbar {
+    padding: 0 9px;
+  }
+  .left {
+    gap: 3px;
+  }
+  .left strong {
+    max-width: 78px;
+    font-size: 10px;
+  }
+  .branchControl {
+    width: 130px;
+    flex-basis: 130px;
+  }
+  .fixedBranch {
+    max-width: 118px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .actions {
+    gap: 1px;
+  }
+}
